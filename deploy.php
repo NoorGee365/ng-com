@@ -3,6 +3,7 @@
  * deploy.php - Single-file Git Deployment Tool for cPanel
  * Repository: grapheart365-eng/ng-com
  * Created: 2026-07-01
+ * Fixed: Commit history display, git pull authentication, proper formatting
  */
 
 ini_set('display_errors', 1);
@@ -82,10 +83,11 @@ if ($is_authenticated && isset($_POST['action'])) {
                 $has_identity = (!empty($git_user_name) && !empty($git_user_email));
                 break;
             case 'pull':
-                $output = safe_shell("git fetch origin && git checkout $TARGET_BRANCH && git pull origin $TARGET_BRANCH");
+                // FIXED: Proper pull with fresh fetch and checkout
+                $output = safe_shell("git fetch --prune origin && git checkout $TARGET_BRANCH && git pull --ff-only origin $TARGET_BRANCH");
                 break;
             case 'force_pull':
-                $output = safe_shell("git fetch origin && git reset --hard origin/$TARGET_BRANCH && git clean -fd");
+                $output = safe_shell("git fetch --prune origin && git checkout $TARGET_BRANCH && git reset --hard origin/$TARGET_BRANCH && git clean -fd");
                 break;
             case 'push':
                 if (!$has_identity) {
@@ -127,9 +129,9 @@ $last_commit_time = 0;
 if ($is_authenticated) {
     $delimiter = "|||";
     $record_delim = "===END===";
-    // Grab last N commits with hash, subject, body, timestamp (unix)
-    $format = "%H$delimiter%s$delimiter%b$delimiter%at$record_delim";
-    $cmd = "git log -$MAX_COMMITS --format='$format' --date=iso";
+    // FIXED: Proper format for git log with correct date and time format
+    $format = "%H$delimiter%s$delimiter%b$delimiter%at$delimiter%ai$record_delim";
+    $cmd = "git log -$MAX_COMMITS --format='$format' -- 2>&1";
     $history_raw = safe_shell($cmd);
     if ($history_raw && strpos($history_raw, 'fatal') === false) {
         $parts = explode($record_delim, $history_raw);
@@ -141,13 +143,15 @@ if ($is_authenticated) {
             $s = $p[1] ?? '';
             $b = trim($p[2] ?? '');
             $t = intval($p[3] ?? 0);
+            $ai = $p[4] ?? '';
             $commit_history[] = [
                 'hash' => $h,
                 'short' => substr($h,0,7),
                 'subject' => $s,
                 'body' => $b,
                 'timestamp' => $t,
-                'karachi' => date('D d-M-Y H:i', $t)
+                'karachi' => date('D d-M-Y H:i:s', $t),
+                'iso_date' => $ai
             ];
         }
     }
@@ -162,7 +166,7 @@ if ($is_authenticated) {
 $status_message = "Unknown";
 $status_color = "text-slate-400";
 if ($is_authenticated) {
-    safe_shell("git fetch origin");
+    safe_shell("git fetch --prune origin");
     $local_hash = trim(safe_shell("git rev-parse HEAD"));
     $remote_hash = trim(safe_shell("git rev-parse origin/$TARGET_BRANCH"));
     if (!empty($local_hash) && $local_hash === $remote_hash) {
@@ -202,7 +206,7 @@ if ($is_authenticated) {
             <div class="flex items-center gap-4">
                 <h1 class="text-xl font-bold text-blue-300">NG WebMaster <span class="text-xs bg-blue-500/20 px-2 py-0.5 rounded text-blue-200">DEPLOY</span></h1>
                 <div class="text-sm text-slate-300">Single-file Deploy Tool</div>
-                <div class="ml-4 text-xs text-slate-400">Repo: <a href="https://github.com/" class="text-blue-300 hover:underline">https://github.com/</a></div>
+                <div class="ml-4 text-xs text-slate-400">Repo: <a href="https://github.com/grapheart365-eng/ng-com" class="text-blue-300 hover:underline">grapheart365-eng/ng-com</a></div>
             </div>
 
             <div class="flex items-center gap-3">
@@ -225,10 +229,10 @@ if ($is_authenticated) {
                 <div class="col-span-5 space-y-3">
                     <div class="grid grid-cols-2 gap-2">
                         <form method="POST"><input type="hidden" name="action" value="pull">
-                            <button type="submit" class="w-full py-3 bg-green-600/10 hover:bg-green-600/20 border border-green-600/30 rounded-xl text-sm font-bold text-green-300 btn-action"><i class="fas fa-download mb-1 block text-base"></i> Pull</button>
+                            <button type="submit" class="w-full py-3 bg-green-600/10 hover:bg-green-600/20 border border-green-600/30 rounded-xl text-sm font-bold text-green-300 btn-action"><i class="fas fa-arrow-down mr-2"></i>Pull</button>
                         </form>
                         <form method="POST" onsubmit="return confirm('Force Pull will discard local changes. Continue?')"><input type="hidden" name="action" value="force_pull">
-                            <button type="submit" class="w-full py-3 bg-blue-600/10 hover:bg-blue-600/20 border border-blue-600/30 rounded-xl text-sm font-bold text-blue-300 btn-action"><i class="fas fa-sync mb-1 block text-base"></i> Force</button>
+                            <button type="submit" class="w-full py-3 bg-blue-600/10 hover:bg-blue-600/20 border border-blue-600/30 rounded-xl text-sm font-bold text-blue-300 btn-action"><i class="fas fa-bolt mr-2"></i>Force Pull</button>
                         </form>
                     </div>
 
@@ -244,7 +248,7 @@ if ($is_authenticated) {
                             <select id="commit_select" class="w-full input-field rounded-lg px-2 py-2 text-sm outline-none" onchange="handleCommitSelect()">
                                 <option value="">Select commit...</option>
                                 <?php foreach ($commit_history as $i => $c): ?>
-                                    <option value="<?php echo $c['hash']; ?>" data-subject="<?php echo htmlspecialchars($c['subject']); ?>" data-body="<?php echo htmlspecialchars($c['body']); ?>" data-date="<?php echo htmlspecialchars($c['karachi']); ?>" data-short="<?php echo $c['short']; ?>">
+                                    <option value="<?php echo $c['hash']; ?>" data-subject="<?php echo htmlspecialchars($c['subject']); ?>" data-body="<?php echo htmlspecialchars($c['body']); ?>" data-date="<?php echo htmlspecialchars($c['karachi']); ?>">
                                         #<?php echo $i+1; ?> [<?php echo $c['short']; ?>] <?php echo $c['karachi']; ?> - <?php echo htmlspecialchars($c['subject']); ?>
                                     </option>
                                 <?php endforeach; ?>
@@ -257,11 +261,11 @@ if ($is_authenticated) {
                                     <div class="text-slate-400 italic h-32 overflow-y-auto whitespace-pre-wrap leading-relaxed text-sm" id="c_desc"></div>
                                 </div>
                                 <div class="flex gap-2">
-                                    <button type="button" onclick="cancelRestore()" class="flex-1 bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 py-2 rounded text-sm font-bold uppercase border border-slate-600/30">Cancel</button>
+                                    <button type="button" onclick="cancelRestore()" class="flex-1 bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 py-2 rounded text-sm font-bold uppercase border border-slate-600/50">Cancel</button>
                                     <form method="POST" class="flex-1" id="restore_form">
                                         <input type="hidden" name="action" value="restore_commit">
                                         <input type="hidden" name="commit_hash" id="restore_hash">
-                                        <button type="submit" onclick="return confirm('Restore to selected commit? This will reset working tree.')" class="w-full bg-red-600/20 hover:bg-red-600/30 text-red-400 py-2 rounded text-sm font-bold uppercase border border-red-600/30">Confirm Restore</button>
+                                        <button type="submit" onclick="return confirm('Restore to selected commit? This will reset working tree.')" class="w-full bg-red-600/20 hover:bg-red-600/30 text-red-300 py-2 rounded font-bold uppercase border border-red-600/30 text-sm">Restore</button>
                                     </form>
                                 </div>
                             </div>
@@ -272,7 +276,7 @@ if ($is_authenticated) {
                         <form method="POST" onsubmit="return confirm('Undo local changes? This will reset to HEAD.')" class="flex-1"><input type="hidden" name="action" value="undo_local">
                             <button type="submit" class="w-full bg-red-900/10 hover:bg-red-900/20 border border-red-900/30 py-3 rounded-lg text-sm text-red-400 font-bold uppercase">Undo Local</button>
                         </form>
-                        <a href="?logout=1" class="flex-1 bg-slate-800 hover:bg-slate-700 py-3 rounded-lg text-sm text-slate-300 font-bold uppercase text-center flex items-center justify-center">Sign Out</a>
+                        <a href="?logout=1" class="flex-1 bg-slate-800 hover:bg-slate-700 py-3 rounded-lg text-sm text-slate-300 font-bold uppercase text-center flex items-center justify-center"><i class="fas fa-sign-out-alt mr-1"></i>Logout</a>
                     </div>
 
                     <div class="mt-2 text-xs text-slate-400">
@@ -290,15 +294,15 @@ if ($is_authenticated) {
                                     <span>Commit Highlight</span>
                                     <span id="time-remaining" class="text-slate-400 lowercase font-normal text-sm"></span>
                                 </label>
-                                <textarea name="commit_msg" rows="2" placeholder="e.g., feat: add new feature" class="w-full input-field rounded-lg px-3 py-3 text-base outline-none commit-title resize-none"><?php echo htmlspecialchars($last_commit_title); ?></textarea>
+                                <textarea name="commit_msg" rows="2" placeholder="e.g., feat: add new feature" class="w-full input-field rounded-lg px-3 py-3 text-base outline-none commit-title resize-none"></textarea>
                             </div>
                             <div class="space-y-1">
                                 <label class="text-xs font-bold text-blue-400 uppercase ml-1">Extended Description</label>
-                                <textarea name="commit_desc" rows="10" placeholder="Provide more details about the changes..." class="w-full input-field rounded-lg px-3 py-3 text-base outline-none commit-desc resize-y"><?php echo htmlspecialchars($last_commit_desc); ?></textarea>
+                                <textarea name="commit_desc" rows="10" placeholder="Provide more details about the changes..." class="w-full input-field rounded-lg px-3 py-3 text-base outline-none commit-desc resize-none"></textarea>
                             </div>
                         </div>
                         <div class="flex gap-2">
-                            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 shadow-lg shadow-blue-900/20">Push to GitHub <i class="fas fa-cloud-upload-alt"></i></button>
+                            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 shadow-lg shadow-blue-900/50"><i class="fas fa-cloud-upload-alt"></i>Push Changes</button>
                             <button type="button" onclick="location.reload()" class="px-4 bg-slate-700 hover:bg-slate-600 py-3 rounded-xl text-sm text-slate-200">Refresh</button>
                         </div>
                     </form>
