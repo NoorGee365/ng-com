@@ -1,23 +1,24 @@
-name: Deploy Noorgee.com to cPanel
+name: Deploy to cPanel
 
 on:
   push:
     branches:
-      - main
+      - main-ng  # یہی وہ برانچ ہے جس پر آپ کام کریں گے
 
 jobs:
-  web-deploy:
-    name: 🎉 Deploy
+  ftp-deploy:
     runs-on: ubuntu-latest
     steps:
-    - name: 🚚 Get latest code
-      uses: actions/checkout@v3
-    
-    - name: 📂 Sync files to cPanel
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-      with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./
-        server-dir: ./public_html/
+      - name: Get latest code
+        uses: actions/checkout@v4
+        with:
+          ref: main-ng  # یہاں بھی برانچ کا نام
+
+      - name: Deploy Files to cPanel
+        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /public_html/ # cPanel پر جہاں فائلیں جانی ہیں
+          local-dir: ./ # آپ کے گٹ ہب رپو میں فائلیں کہاں ہیں (جوڑ سے شروع)
