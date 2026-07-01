@@ -12,9 +12,9 @@ error_reporting(E_ALL);
 session_start();
 
 // ----- Configuration -----
-$PASSWORD = "123"; // default password
-$TARGET_BRANCH = "main"; // change as needed
-$MAX_COMMITS = 25; // number of commits to list
+$PASSWORD = "1234"; // default password
+$TARGET_BRANCH = "main-ng"; // change as needed
+$MAX_COMMITS = 50; // number of commits to list
 date_default_timezone_set('Asia/Karachi'); // Karachi timezone for commit list display
 // -------------------------
 
