@@ -676,5 +676,16 @@
             });
         });
     </script>
+    
+    <!-- Footer with Copyright and Last Updated Time -->
+    <footer class="mt-12 py-4 text-center text-gray-500 text-sm">
+        <p>&copy; 2024 Noorgee Global. All rights reserved.</p>
+        <p id="last-updated" class="text-xs mt-1"></p>
+    </footer>
+    
+    <script>
+        // Display the last updated time
+        document.getElementById('last-updated').textContent = 'Last updated: ' + new Date().toLocaleString();
+    </script>
 </body>
 </html>
