@@ -283,6 +283,27 @@ if ($is_authenticated) {
                         <div>Git Identity: <span class="text-slate-100 font-mono"><?php echo htmlspecialchars($git_user_name . ' <' . $git_user_email . '>'); ?></span></div>
                         <div class="mt-1 text-xxs text-slate-500">Note: When editing, write a commit title within ~10 words and detailed extended description. (Manus AI instruction)</div>
                     </div>
+
+                    <div class="bg-slate-900/30 border border-slate-700/40 rounded-lg p-3">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="text-sm font-bold text-blue-300">Recent Commits (<?php echo count($commit_history); ?>)</div>
+                            <div class="text-xs text-slate-400">Timezone: Karachi</div>
+                        </div>
+                        <div class="space-y-2 max-h-56 overflow-y-auto">
+                            <?php foreach ($commit_history as $i => $c): ?>
+                                <div class="p-2 rounded border border-slate-700/40 bg-slate-800/20">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <div>
+                                            <div class="text-sm font-bold text-blue-200">#<?php echo $i+1; ?> [<?php echo $c['short']; ?>] <span class="text-slate-300"><?php echo htmlspecialchars($c['subject']); ?></span></div>
+                                            <div class="text-xs text-slate-400"><?php echo htmlspecialchars($c['karachi']); ?></div>
+                                        </div>
+                                        <div class="text-xs text-slate-400 font-mono">ID: <?php echo htmlspecialchars($c['short']); ?></div>
+                                    </div>
+                                    <div class="mt-2 text-sm text-slate-200 whitespace-pre-wrap"><?php echo htmlspecialchars($c['body'] ?: '— No extended description —'); ?></div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="col-span-7 space-y-3">
@@ -318,26 +339,7 @@ if ($is_authenticated) {
                         ?></pre>
                     </div>
 
-                    <div class="bg-slate-900/30 border border-slate-700/40 rounded-lg p-3">
-                        <div class="flex justify-between items-center mb-2">
-                            <div class="text-sm font-bold text-blue-300">Recent Commits (<?php echo count($commit_history); ?>)</div>
-                            <div class="text-xs text-slate-400">Timezone: Karachi</div>
-                        </div>
-                        <div class="space-y-2 max-h-56 overflow-y-auto">
-                            <?php foreach ($commit_history as $i => $c): ?>
-                                <div class="p-2 rounded border border-slate-700/40 bg-slate-800/20">
-                                    <div class="flex items-start justify-between gap-2">
-                                        <div>
-                                            <div class="text-sm font-bold text-blue-200">#<?php echo $i+1; ?> [<?php echo $c['short']; ?>] <span class="text-slate-300"><?php echo htmlspecialchars($c['subject']); ?></span></div>
-                                            <div class="text-xs text-slate-400"><?php echo htmlspecialchars($c['karachi']); ?></div>
-                                        </div>
-                                        <div class="text-xs text-slate-400 font-mono">ID: <?php echo htmlspecialchars($c['short']); ?></div>
-                                    </div>
-                                    <div class="mt-2 text-sm text-slate-200 whitespace-pre-wrap"><?php echo htmlspecialchars($c['body'] ?: '— No extended description —'); ?></div>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
+
 
                 </div>
             </div>
