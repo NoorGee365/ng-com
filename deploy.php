@@ -1,7 +1,7 @@
 <?php
 /**
  * deploy.php - Single-file Git Deployment Tool for cPanel
- * Repository: grapheart365-eng/ng-com
+ * Repository: NoorGee365/ng-com
  * Created: 2026-07-01
  * Fixed: Commit history display, git pull authentication, proper formatting
  */
@@ -204,9 +204,9 @@ if ($is_authenticated) {
     <div class="w-full max-w-5xl glass rounded-2xl p-5 shadow-2xl border-t-2 border-blue-500">
         <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-4">
-                <h1 class="text-xl font-bold text-blue-300">NG WebMaster <span class="text-xs bg-blue-500/20 px-2 py-0.5 rounded text-blue-200">DEPLOY</span></h1>
+                <h1 class="text-xl font-bold text-blue-300">NG Main site Deploy <span class="text-xs bg-blue-500/20 px-2 py-0.5 rounded text-blue-200">DEPLOY</span></h1>
                 <div class="text-sm text-slate-300">Single-file Deploy Tool</div>
-                <div class="ml-4 text-xs text-slate-400">Repo: <a href="https://github.com/grapheart365-eng/ng-com" class="text-blue-300 hover:underline">grapheart365-eng/ng-com</a></div>
+                <div class="ml-4 text-xs text-slate-400">Repo: <a href="https://github.com/NoorGee365/ng-com" class="text-blue-300 hover:underline">NoorGee365/ng-com</a></div>
             </div>
 
             <div class="flex items-center gap-3">
