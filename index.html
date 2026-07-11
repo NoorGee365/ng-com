@@ -84,6 +84,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
+    <!-- AOS Scroll Reveal -->
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -153,6 +156,33 @@
         html {
             scroll-behavior: smooth;
         }
+
+        /* === ANIMATION 1: Floating Particles === */
+        #particles-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            border-radius: 1.5rem;
+        }
+        #hero { position: relative; overflow: hidden; }
+        #hero > * { position: relative; z-index: 1; }
+
+        /* === ANIMATION 2: Typing Text Cursor === */
+        #typed-text {
+            border-right: 3px solid #06b6d4;
+            padding-right: 4px;
+            animation: blink-cursor 0.75s step-end infinite;
+            white-space: nowrap;
+        }
+        @keyframes blink-cursor {
+            0%, 100% { border-color: #06b6d4; }
+            50% { border-color: transparent; }
+        }
+
+        /* === ANIMATION 3: AOS Custom Tweaks === */
+        [data-aos] { will-change: transform, opacity; }
     </style>
 </head>
 <body class="min-h-screen antialiased flex flex-col">
@@ -212,10 +242,12 @@
 
         <!-- Hero Section -->
         <section id="hero" class="grid md:grid-cols-12 gap-8 items-center bg-white/70 backdrop-blur-md p-6 md:p-12 rounded-3xl shadow-xl border border-white">
+            <!-- Particles Canvas Background -->
+            <canvas id="particles-canvas"></canvas>
             <div class="md:col-span-7 space-y-6">
                 <span class="inline-block px-3 py-1 bg-cyan-100 text-cyan-800 text-xs font-semibold rounded-full tracking-wide uppercase">Unified Platform</span>
                 <h1 class="text-3xl md:text-5xl font-extrabold text-primary leading-tight">
-                    NoorGee - E-Commerce, Tools & <span class="text-accent">Digital Services</span> Ecosystem
+                    NoorGee - <span id="typed-text" class="text-accent">E-Commerce</span> Ecosystem
                 </h1>
                 <p class="text-base md:text-lg text-gray-600 leading-relaxed">
                     A centralized portal connecting global commerce, AI-guided shopping insights, essential digital utilities, and custom software/media solutions.
@@ -307,7 +339,7 @@
         </div>
 
         <!-- About NoorGee Section -->
-        <section id="about" class="grid md:grid-cols-2 gap-8 items-center bg-white rounded-3xl p-8 shadow-lg border border-gray-100">
+        <section id="about" data-aos="fade-up" data-aos-duration="700" class="grid md:grid-cols-2 gap-8 items-center bg-white rounded-3xl p-8 shadow-lg border border-gray-100">
             <div class="space-y-4">
                 <span class="text-accent text-xs font-extrabold uppercase tracking-widest">Our Identity</span>
                 <h2 class="text-3xl font-extrabold text-primary">About NoorGee</h2>
@@ -325,8 +357,8 @@
                 </div>
             </div>
 
-            <!-- Vision and Pillars Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Vision and Pillars Cards (AOS staggered) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" data-aos="fade-left" data-aos-duration="800" data-aos-delay="150">
                 <div class="p-6 bg-slate-50 border border-slate-100 rounded-2xl space-y-2">
                     <div class="w-10 h-10 bg-cyan-100 rounded-xl flex items-center justify-center text-accent">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -362,7 +394,7 @@
         </section>
 
         <!-- Ecosystem Projects Grid (Categorized) -->
-        <section id="projects" class="space-y-8">
+        <section id="projects" data-aos="fade-up" data-aos-duration="700" class="space-y-8">
             <div class="text-center max-w-3xl mx-auto space-y-3">
                 <span class="text-accent text-xs font-extrabold uppercase tracking-widest">Our Platforms</span>
                 <h2 class="text-3xl md:text-4xl font-extrabold text-primary">The NoorGee Ecosystem</h2>
@@ -377,7 +409,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
                         Global E-Commerce Platforms
                     </h3>
-                    <div class="grid md:grid-cols-2 gap-6">
+                    <div class="grid md:grid-cols-2 gap-6" data-aos="fade-up" data-aos-duration="600" data-aos-delay="100">
                         <!-- US Card -->
                         <div class="card-effect bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between">
                             <div class="space-y-3">
@@ -1011,6 +1043,130 @@
                 appendMessage("Thank you for your message! Since I'm currently running in automated assistant mode, I've logged this. For direct assistance, please contact us at <strong>nooruddin2020@gmail.com</strong>.", false);
             }, 800);
         }
+    </script>
+
+    <!-- AOS Library -->
+    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+
+    <script>
+    // ============================================
+    // ANIMATION 1: Floating Particles (Hero BG)
+    // ============================================
+    (function() {
+        const canvas = document.getElementById('particles-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        const COUNT = 38;
+        const COLORS = ['rgba(6,182,212,0.35)', 'rgba(14,165,233,0.25)', 'rgba(99,102,241,0.18)', 'rgba(6,182,212,0.15)'];
+
+        function resize() {
+            const hero = document.getElementById('hero');
+            canvas.width  = hero.offsetWidth;
+            canvas.height = hero.offsetHeight;
+        }
+
+        function makeParticle() {
+            return {
+                x: Math.random() * canvas.width,
+                y: canvas.height + Math.random() * 60,
+                r: Math.random() * 5 + 2,
+                speed: Math.random() * 0.6 + 0.3,
+                drift: (Math.random() - 0.5) * 0.4,
+                color: COLORS[Math.floor(Math.random() * COLORS.length)],
+                opacity: Math.random() * 0.6 + 0.2
+            };
+        }
+
+        function init() {
+            resize();
+            particles = [];
+            for (let i = 0; i < COUNT; i++) {
+                const p = makeParticle();
+                p.y = Math.random() * canvas.height; // scatter initially
+                particles.push(p);
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((p, i) => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.fill();
+
+                // Glow effect
+                ctx.beginPath();
+                const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 3);
+                grad.addColorStop(0, p.color);
+                grad.addColorStop(1, 'transparent');
+                ctx.arc(p.x, p.y, p.r * 3, 0, Math.PI * 2);
+                ctx.fillStyle = grad;
+                ctx.fill();
+
+                p.y -= p.speed;
+                p.x += p.drift;
+
+                if (p.y < -10) particles[i] = makeParticle();
+            });
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', init);
+        init();
+        animate();
+    })();
+
+    // ============================================
+    // ANIMATION 2: Typing Text Effect (Hero H1)
+    // ============================================
+    (function() {
+        const el = document.getElementById('typed-text');
+        if (!el) return;
+        const words = [
+            'E-Commerce',
+            'Digital Tools',
+            'IT Utilities',
+            'Blog Platform',
+            'Legal Services',
+            'Media Solutions',
+            'Global Commerce'
+        ];
+        let wordIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        let pause = false;
+
+        function type() {
+            if (pause) { setTimeout(type, 1500); pause = false; return; }
+            const current = words[wordIndex];
+            if (!isDeleting) {
+                el.textContent = current.slice(0, charIndex + 1);
+                charIndex++;
+                if (charIndex === current.length) { pause = true; isDeleting = true; }
+                setTimeout(type, 90);
+            } else {
+                el.textContent = current.slice(0, charIndex - 1);
+                charIndex--;
+                if (charIndex === 0) {
+                    isDeleting = false;
+                    wordIndex = (wordIndex + 1) % words.length;
+                }
+                setTimeout(type, 45);
+            }
+        }
+        setTimeout(type, 800);
+    })();
+
+    // ============================================
+    // ANIMATION 3: AOS Scroll Reveal - Init
+    // ============================================
+    AOS.init({
+        once: true,
+        offset: 60,
+        easing: 'ease-out-cubic'
+    });
     </script>
 </body>
 </html>
