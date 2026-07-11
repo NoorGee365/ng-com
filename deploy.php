@@ -333,7 +333,7 @@ if ($is_authenticated) {
                                         </div>
                                         <div class="text-xs text-slate-400 font-mono">ID: <?php echo htmlspecialchars($c['short']); ?></div>
                                     </div>
-                                    <div class="mt-2 text-sm text-slate-200 whitespace-pre-wrap"><?php echo htmlspecialchars($c['body'] ?: '— No extended description —'); ?></div>
+                                    <div class="mt-2 text-sm text-slate-200 whitespace-pre-wrap"><?php echo htmlspecialchars($c['body'] ?: '- No extended description -'); ?></div>
                                 </div>
                             <?php endforeach; ?>
                         </div>
