@@ -20,9 +20,42 @@ date_default_timezone_set('Asia/Karachi'); // Karachi timezone for commit list d
 // -------------------------
 
 // Helpers
+function get_git_path() {
+    static $path = null;
+    if ($path !== null) return $path;
+
+    $common_paths = [
+        'git',
+        '/usr/bin/git',
+        '/usr/local/bin/git',
+        '/usr/local/cpanel/3rdparty/bin/git',
+        '/bin/git',
+        '/usr/sfw/bin/git'
+    ];
+
+    foreach ($common_paths as $p) {
+        if (function_exists('shell_exec')) {
+            $out = @shell_exec("$p --version 2>&1");
+            if ($out && stripos($out, 'git version') !== false) {
+                $path = $p;
+                return $path;
+            }
+        }
+    }
+    
+    $path = 'git';
+    return $path;
+}
+
 function safe_shell($cmd) {
     // run command if shell_exec available
     if (!function_exists('shell_exec')) return "Error: shell_exec() is disabled on this host.";
+    $git_path = get_git_path();
+    // Automatically replace "git" at start or after shell delimiters with the correct path
+    $cmd = preg_replace('/(?<=^|;|&&|\|\||&)\s*git\b/', ' ' . $git_path, $cmd);
+    // Enforce running the command inside the directory of deploy.php
+    $cwd = escapeshellarg(__DIR__);
+    $cmd = "cd $cwd && " . $cmd;
     $out = shell_exec($cmd . " 2>&1");
     return $out === null ? "" : $out;
 }
@@ -279,9 +312,10 @@ if ($is_authenticated) {
                         <a href="?logout=1" class="flex-1 bg-slate-800 hover:bg-slate-700 py-3 rounded-lg text-sm text-slate-300 font-bold uppercase text-center flex items-center justify-center"><i class="fas fa-sign-out-alt mr-1"></i>Logout</a>
                     </div>
 
-                    <div class="mt-2 text-xs text-slate-400">
+                    <div class="mt-2 text-xs text-slate-400 space-y-1">
                         <div>Git Identity: <span class="text-slate-100 font-mono"><?php echo htmlspecialchars($git_user_name . ' <' . $git_user_email . '>'); ?></span></div>
-                        <div class="mt-1 text-xxs text-slate-500">Note: When editing, write a commit title within ~10 words and detailed extended description. (Manus AI instruction)</div>
+                        <div>Git Path: <span class="text-slate-100 font-mono"><?php echo htmlspecialchars(get_git_path()); ?></span></div>
+                        <div class="text-xxs text-slate-500">Note: When editing, write a commit title within ~10 words and detailed extended description. (Manus AI instruction)</div>
                     </div>
 
                     <div class="bg-slate-900/30 border border-slate-700/40 rounded-lg p-3">
